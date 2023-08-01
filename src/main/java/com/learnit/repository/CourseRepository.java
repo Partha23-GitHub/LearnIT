@@ -16,11 +16,11 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 	
 	Page<Course> findByTitleContainingIgnoreCase(String title,Pageable pageable);
 	
-//	@Query("SELECT c FROM Course c where c.id = :userId")
-//	List<Course> findEnrolledCoursesByUserId(@Param("userId") Long userId);
-//	
-//	@Query("SELECT c FROM Course c WHERE c.instructor_id = :instructorId")
-//	List<Course> findCoursesByInstructorId(@Param("instructorId") Long instructorId);
+	// Get all enrolled courses for a user by email with pagination
+    Page<Course> findAllByEnrolledUsersEmail(String email, Pageable pageable);
+
+    // Get all created courses for a user by email with pagination
+    Page<Course> findAllByInstructorEmail(String email, Pageable pageable);
 
 
 

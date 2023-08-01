@@ -23,4 +23,8 @@ public interface CourseService {
 	CourseDto uploadThumbnail(MultipartFile file,Long courseId);
 	
 	Double updateRating(Long courseId, Double rating);
+	
+	PagenatedCoursesList getUserEnrollments(String email,Integer pageNumber, Integer pageSize, String sortBy,String sortDirection);
+	
+	PagenatedCoursesList getCreatedCourse(String email,Integer pageNumber, Integer pageSize, String sortBy,String sortDirection);
 }

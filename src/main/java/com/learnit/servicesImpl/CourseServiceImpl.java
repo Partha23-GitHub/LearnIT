@@ -216,5 +216,57 @@ public class CourseServiceImpl implements CourseService {
 		
 		return savedCourse.getRating();
 	}
+	@Override
+	public PagenatedCoursesList getUserEnrollments(String email,Integer pageNumber, Integer pageSize, String sortBy,String sortDirection) {
+		Sort sort=sortDirection.equalsIgnoreCase("descending")?Sort.by(sortBy).descending():Sort.by(sortBy).ascending();
+		
+		Pageable p=PageRequest.of(pageNumber, pageSize,sort);
+		Page<Course>pagecourse= this.courseRepository.findAllByEnrolledUsersEmail(email, p);
+		List<Course> allCourses = pagecourse.getContent();
+		
+		List<CourseDtoWithoutLessons> allCourseDtos = allCourses.stream()
+				.map(course->{
+				CourseDtoWithoutLessons courseDtoList = this.modelMapper.map(course, CourseDtoWithoutLessons.class);
+				courseDtoList.setNumberOfEnrollments((long)course.getEnrolledUsers().size());
+				return courseDtoList;
+				}).collect(Collectors.toList());
+		//setting post response for returning
+		PagenatedCoursesList courseResponse=new PagenatedCoursesList();
+		
+		courseResponse.setCourses(allCourseDtos);
+		courseResponse.setPageNumber(pagecourse.getNumber());
+		courseResponse.setPageSize(pagecourse.getSize());
+		courseResponse.setTotalElements((int)pagecourse.getTotalElements());
+		courseResponse.setTotalPages(pagecourse.getTotalPages());
+		courseResponse.setLastPage(pagecourse.isLast());
+		
+		return courseResponse;
+	}
+	@Override
+	public PagenatedCoursesList getCreatedCourse(String email,Integer pageNumber, Integer pageSize, String sortBy,String sortDirection) {
+		Sort sort=sortDirection.equalsIgnoreCase("descending")?Sort.by(sortBy).descending():Sort.by(sortBy).ascending();
+		
+		Pageable p=PageRequest.of(pageNumber, pageSize,sort);
+		Page<Course>pagecourse= this.courseRepository.findAllByInstructorEmail(email, p);
+		List<Course> allCourses = pagecourse.getContent();
+		
+		List<CourseDtoWithoutLessons> allCourseDtos = allCourses.stream()
+				.map(course->{
+				CourseDtoWithoutLessons courseDtoList = this.modelMapper.map(course, CourseDtoWithoutLessons.class);
+				courseDtoList.setNumberOfEnrollments((long)course.getEnrolledUsers().size());
+				return courseDtoList;
+				}).collect(Collectors.toList());
+		//setting post response for returning
+		PagenatedCoursesList courseResponse=new PagenatedCoursesList();
+		
+		courseResponse.setCourses(allCourseDtos);
+		courseResponse.setPageNumber(pagecourse.getNumber());
+		courseResponse.setPageSize(pagecourse.getSize());
+		courseResponse.setTotalElements((int)pagecourse.getTotalElements());
+		courseResponse.setTotalPages(pagecourse.getTotalPages());
+		courseResponse.setLastPage(pagecourse.isLast());
+		
+		return courseResponse;
+	}
 
 }

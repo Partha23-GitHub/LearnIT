@@ -123,6 +123,30 @@ public class CourseController {
 		return new ResponseEntity<PagenatedCoursesList>(searchedCourses,HttpStatus.OK);
 	}
 	
+	//get all enrolled courses
+	@GetMapping("/enrolled-courses")
+	public ResponseEntity<PagenatedCoursesList>getEnrolledCourses(@RequestParam(value="pageNumber",defaultValue=CourseConstants.PAGE_NUMBER,required = false)Integer pageNumber,
+					@RequestParam(value="pageSize",defaultValue=CourseConstants.PAGE_SIZE,required = false)Integer pageSize,
+					@RequestParam(value="sortBy",defaultValue =CourseConstants.SORT_BY,required = false)String sortBy,
+					@RequestParam(value="sortDirection",defaultValue =CourseConstants.SORT_DIR,required = false)String sortDirection){
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		PagenatedCoursesList searchedCourses = this.courseService.getUserEnrollments(auth.getName(), pageNumber, pageSize, sortBy, sortDirection);
+		return new ResponseEntity<PagenatedCoursesList>(searchedCourses,HttpStatus.OK);
+	}
+	
+	//get all created courses
+		@GetMapping("/created-courses")
+		public ResponseEntity<PagenatedCoursesList>getcreatedCourses(@RequestParam(value="pageNumber",defaultValue=CourseConstants.PAGE_NUMBER,required = false)Integer pageNumber,
+						@RequestParam(value="pageSize",defaultValue=CourseConstants.PAGE_SIZE,required = false)Integer pageSize,
+						@RequestParam(value="sortBy",defaultValue =CourseConstants.SORT_BY,required = false)String sortBy,
+						@RequestParam(value="sortDirection",defaultValue =CourseConstants.SORT_DIR,required = false)String sortDirection){
+			
+			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+			PagenatedCoursesList searchedCourses = this.courseService.getCreatedCourse(auth.getName(), pageNumber, pageSize, sortBy, sortDirection);
+			return new ResponseEntity<PagenatedCoursesList>(searchedCourses,HttpStatus.OK);
+		}
+	
 	//add humbnail
 	@PutMapping("/thumbnail/{courseId}")
 	public ResponseEntity<CourseDto>uploadThumbnail(@RequestParam MultipartFile file, @PathVariable Long courseId){
@@ -146,7 +170,7 @@ public class CourseController {
 		return new ResponseEntity<ApiResponse>(new ApiResponse("Something went Wrong",false),HttpStatus.OK);
 	}
 	
-	@PostMapping("/enroll")
+	@PostMapping("/do-enroll")
 	public ResponseEntity<ApiResponse> enrollIntoCourses(@Param("courseId")Long courseId) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		
