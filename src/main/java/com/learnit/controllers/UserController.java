@@ -1,9 +1,12 @@
 package com.learnit.controllers;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.learnit.payloads.ApiResponse;
 import com.learnit.payloads.AuthUserDto;
 import com.learnit.payloads.ChangePassword;
+import com.learnit.payloads.ForgotPassword;
 import com.learnit.payloads.JwtAuthRequest;
 import com.learnit.payloads.JwtAuthResponse;
 import com.learnit.services.UserService;
@@ -59,6 +63,29 @@ public class UserController {
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse("Wrong password ! Try againg",false), HttpStatus.OK);
 	}
+	
+	@PostMapping("/send-otp")
+	public ResponseEntity<?> sendOtpForForgotPassword(@Param("email")String email) throws Exception {
+		String otp = this.userService.sendForgotPasswordOtp(email);
+		
+		if(otp.length()==6) {
+			Map<String, String>response=new HashMap<>();
+			response.put("otp", otp);
+			response.put("message", "OTP has been sent to "+email);
+			return new ResponseEntity<Map<String, String>>(response, HttpStatus.OK);
+		}
+		return new ResponseEntity<ApiResponse>(new ApiResponse("Email does not exist! put a valid email",false), HttpStatus.OK);
+	}
+	
+	@PostMapping("/reset-password")
+	public ResponseEntity<ApiResponse> changePasswordForForgotPassword(@RequestBody ForgotPassword forgotPassword) throws Exception {
+		boolean isChanged = this.userService.forgotPassword(forgotPassword);
+		if(isChanged)
+			return new ResponseEntity<ApiResponse>(new ApiResponse("Password changed successfully!! please login",true), HttpStatus.OK);
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse("Something went wrong! try again",false), HttpStatus.OK);
+	}
+	
 	
 	//post image upload
 	@PatchMapping("/image/upload")

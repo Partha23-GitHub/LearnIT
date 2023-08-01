@@ -1,5 +1,8 @@
 package com.learnit.servicesImpl;
 
+import java.text.DecimalFormat;
+import java.util.Random;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,8 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.learnit.exceptions.ApiException;
 import com.learnit.models.User;
+import com.learnit.payloads.ApiResponse;
 import com.learnit.payloads.AuthUserDto;
 import com.learnit.payloads.ChangePassword;
+import com.learnit.payloads.ForgotPassword;
 import com.learnit.payloads.JwtAuthRequest;
 import com.learnit.payloads.JwtAuthResponse;
 import com.learnit.repository.UserRepository;
@@ -116,9 +121,6 @@ public class UserServiceImpl implements UserService {
 	public boolean changePassword(ChangePassword obj,String userName) {
 		User user = this.userRepository.findByEmail(userName);
 		
-		System.out.println("old : "+user.getPassword());
-		System.out.println("new : "+this.passwordEncoder.encode(obj.getOldPassword()));
-		
 		if(this.passwordEncoder.matches(obj.getOldPassword(),user.getPassword())) {
 			user.setPassword(this.passwordEncoder.encode(obj.getNewPassword()));
 			this.userRepository.save(user);
@@ -145,6 +147,55 @@ public class UserServiceImpl implements UserService {
 		AuthUserDto userDto = this.modelMapper.map(savedUser, AuthUserDto.class);
 		return userDto;
 	}
-	
-	
+	@Override
+	public String sendForgotPasswordOtp(String email) {
+		try {
+			User user = this.userRepository.findByEmail(email);
+			String otp=new DecimalFormat("000000").format(new Random().nextInt(999999));
+			user.setForgotPasswordOtp(otp);
+			this.userRepository.save(user);
+			// ***********
+			String subject="Reset Your Password - OTP Verification Required!";
+			String body="<html>\r\n"
+					+ "<head>\r\n"
+					+ "    <meta charset=\"UTF-8\">\r\n"
+					+ "    <title>Forgot Password - OTP Verification</title>\r\n"
+					+ "</head>\r\n"
+					+ "<body>\r\n"
+					+ "    <h1>Forgot Password - OTP Verification</h1>\r\n"
+					+ "    <p>Hello "+user.getName()+",</p>\r\n"
+					+ "    <p>We received a request to reset your password. To continue with the password reset process, please enter the OTP (One-Time Password) below:</p>\r\n"
+					+ "    <p style=\"font-size: 24px; font-weight: bold;\">"+otp+"</p>\r\n"
+					+ "    <p style=\"font-style: italic;\">Please note that this OTP is valid for a single use and will expire after a short period of time for security reasons.</p>\r\n"
+					+ "    <p>If you did not request a password reset, you can safely ignore this email.</p>\r\n"
+					+ "    <p>Best regards,</p>\r\n"
+					+ "    <p>The LearnIT Team</p>\r\n"
+					+ "</body>\r\n"
+					+ "</html>";
+			
+			this.emailService.sendMail(email, subject, body);
+			
+			return otp;
+		}catch (Exception e) {
+			return "Email does not exist";
+		}
+	}
+	@Override
+	public boolean forgotPassword(ForgotPassword forgotPassword) {
+		User user=null;
+		try {
+			user = this.userRepository.findByEmail(forgotPassword.getEmail());
+			if(user.getForgotPasswordOtp().equals(forgotPassword.getOtp())){
+				user.setPassword(this.passwordEncoder.encode(forgotPassword.getPassword()));
+				user.setForgotPasswordOtp(null);
+				this.userRepository.save(user);
+				return true;
+			}
+			
+		}catch (Exception e) {
+			return false;
+		}
+		return false;
+	}
+
 }

@@ -27,7 +27,7 @@ public class SecurityConfig{
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 	
-    public static final String[] PUBLIC_URLS = {"/api/auth/login","/api/auth/register", "/api/courses"};
+    public static final String[] PUBLIC_URLS = {"/api/auth/login","/api/auth/register","/api/auth/send-otp","/api/auth/reset-password", "/api/courses"};
 
     
     

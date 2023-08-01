@@ -54,6 +54,8 @@ public class User implements UserDetails{
     private String profilePicture;
     
     private String role="USER";
+    @Column(nullable = true)
+    private String forgotPasswordOtp;
     
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_course",

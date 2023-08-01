@@ -14,7 +14,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtTokenHelper {
-	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+	public static final long JWT_TOKEN_VALIDITY = 24 * 60 * 60;
 
 
     private String secret = "jwtTokenKey";
